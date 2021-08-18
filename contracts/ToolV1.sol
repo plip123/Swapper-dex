@@ -3,10 +3,10 @@
 pragma solidity ^0.8.0;
 
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "./IRouter.sol";
-import "hardhat/console.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./interfaces/IRouter.sol";
 
-contract ToolV1 {
+contract ToolV1 is Initializable {
     using SafeMath for uint256;
     IRouter router;
     address recipientAddr;
@@ -15,7 +15,7 @@ contract ToolV1 {
      * Constructor
      * @param _recipient Address where fees will be sent
      */
-    constructor(address _recipient) {
+    function initialize(address _recipient) public initializer {
         router = IRouter(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
         recipientAddr = _recipient;
     }
@@ -43,8 +43,6 @@ contract ToolV1 {
                 path[1] = tokens[i];
 
                 amountsOut = router.getAmountsOut(amount, path);
-                // weth.deposit{value: total}();
-                // weth.approve(getInstancePool, total);
 
                 // Exchange ETH for token1
                 router.swapExactETHForTokens{value: amount}(
@@ -57,62 +55,6 @@ contract ToolV1 {
         }
 
         // Transfer fee to recipient
-        payable(recipientAddr).transfer(fee);
-    }
-
-    /**
-     * Exchanges from token to tokens
-     * @param _percentage Array containing the percentage of the two tokens that need to be exchanged
-     * @param tokenFrom Token to be exchanged
-     * @param tokenTo1 Address of the first token to be exchanged for tokenFrom
-     * @param tokenTo2 Address of the second token to be exchanged for tokenFrom
-     * @param amount Amount of token to be exchanged
-     */
-    function swapTokenToToken(
-        uint256[] memory _percentage,
-        address tokenFrom,
-        address tokenTo1,
-        address tokenTo2,
-        uint256 amount
-    ) public payable {
-        require(amount > 0, "Not enough ETH");
-        require(
-            _percentage[0].add(_percentage[1]) <= 100 &&
-                _percentage[0].add(_percentage[1]) > 0,
-            "Invalid percentage"
-        );
-        uint256 fee = (amount).div(1000);
-        uint256 _value = (amount).sub(fee);
-        amount = (_percentage[0].mul(_value)).div(100);
-        address[] memory path = new address[](2);
-
-        path[0] = tokenFrom;
-        path[1] = tokenTo1;
-
-        uint256[] memory amountsOut = router.getAmountsOut(amount, path);
-
-        router.swapExactTokensForTokens(
-            amountsOut[1],
-            0,
-            path,
-            msg.sender,
-            block.timestamp
-        );
-
-        path[1] = tokenTo2;
-        amount = (_percentage[1].mul(_value)).div(100);
-
-        amountsOut = router.getAmountsOut(amount, path);
-
-        router.swapExactTokensForTokens(
-            amountsOut[1],
-            0,
-            path,
-            msg.sender,
-            block.timestamp
-        );
-
-        //Transfer fee to recipient
         payable(recipientAddr).transfer(fee);
     }
 
