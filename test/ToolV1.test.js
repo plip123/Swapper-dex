@@ -41,7 +41,7 @@ describe("ToolV1", () => {
         it("Should fail because it did not send an amount of ETH greater than 0", async () => {
             let errStatus = false
             try {
-                await swapper.connect(alice).swapETHToToken([50, 50], DAI, LINK, {value: toWei("0")});
+                await swapper.connect(alice).swapETHToToken([50, 50], [DAI, LINK], {value: toWei("0")});
             } catch(e) {
                 assert(e.toString().includes('Not enough ETH'));
                 errStatus = true;
@@ -53,7 +53,7 @@ describe("ToolV1", () => {
         it("Should not perform the operation if the sum of the percentages is greater than 100", async () => {
             let errStatus = false
             try {
-                await swapper.connect(alice).swapETHToToken([60, 50], DAI, LINK, {value: toWei("1")});
+                await swapper.connect(alice).swapETHToToken([60, 50], [DAI, LINK], {value: toWei("1")});
             } catch(e) {
                 assert(e.toString().includes('Invalid percentage'));
                 errStatus = true;
@@ -65,7 +65,7 @@ describe("ToolV1", () => {
         it("Should not perform the operation if the sum of the percentages is less than 0", async () => {
             let errStatus = false
             try {
-                await swapper.connect(alice).swapETHToToken([0, 0], DAI, LINK, {value: toWei("1")});
+                await swapper.connect(alice).swapETHToToken([0, 0], [DAI, LINK], {value: toWei("1")});
             } catch(e) {
                 assert(e.toString().includes('Invalid percentage'));
                 errStatus = true;
@@ -76,7 +76,7 @@ describe("ToolV1", () => {
 
         it("Should have a positive balance LINK", async () => {
             const beforeBalance = await link.balanceOf(alice.address);
-            await swapper.connect(alice).swapETHToToken([50, 50], DAI, LINK, {value: toWei("1")});
+            await swapper.connect(alice).swapETHToToken([50, 50], [DAI, LINK], {value: toWei("1")});
             const currentBalance = await link.balanceOf(alice.address);
             expect(Number(currentBalance)).to.gt(Number(beforeBalance));
         });
@@ -84,7 +84,7 @@ describe("ToolV1", () => {
 
         it("Should have a positive balance TETHER", async () => {
             const beforeBalance = await usdt.balanceOf(alice.address);
-            await swapper.connect(alice).swapETHToToken([50, 50], TETHER_USDT, DAI, {value: toWei("1")});
+            await swapper.connect(alice).swapETHToToken([50, 50], [TETHER_USDT, DAI], {value: toWei("1")});
             const currentBalance = await usdt.balanceOf(alice.address);
             expect(Number(currentBalance)).to.gt(Number(beforeBalance));
         });
@@ -92,7 +92,7 @@ describe("ToolV1", () => {
 
         it("Should have a positive balance DAI", async () => {
             const beforeBalance = await dai.balanceOf(alice.address);
-            await swapper.connect(alice).swapETHToToken([50, 50], LINK, DAI, {value: toWei("1")});
+            await swapper.connect(alice).swapETHToToken([50, 50], [LINK, DAI], {value: toWei("1")});
             const currentBalance = await dai.balanceOf(alice.address);
             expect(Number(currentBalance)).to.gt(Number(beforeBalance));
         });
@@ -100,7 +100,7 @@ describe("ToolV1", () => {
 
         it("Should have charged a 0.1% fee", async () => {
             const beforeBalance = await admin.getBalance();
-            await swapper.connect(alice).swapETHToToken([50, 50], DAI, TETHER_USDT, {value: toWei("1")});
+            await swapper.connect(alice).swapETHToToken([50, 50], [DAI, TETHER_USDT], {value: toWei("1")});
             const fee = Number(toWei("1") / 1000);
             const currentBalance = await admin.getBalance();
             expect(Number(currentBalance) - fee).to.equal(Number(beforeBalance));
