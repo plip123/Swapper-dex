@@ -62,7 +62,7 @@ describe("ToolV1", () => {
         });
 
 
-        it("Should not perform the operation if the sum of the percentages is less than 0", async () => {
+        it("Should not perform the operation if the sum of the percentages is less than 100", async () => {
             let errStatus = false
             try {
                 await swapper.connect(alice).swapETHToToken([0, 0], [DAI, LINK], {value: toWei("1")});
@@ -71,6 +71,18 @@ describe("ToolV1", () => {
                 errStatus = true;
             }
             assert(errStatus, 'Did not make a mistake when the user entered an incorrect percentage')
+        });
+
+
+        it("Should fail if the number of percentages does not match the number of tokens", async () => {
+            let errStatus = false
+            try {
+                await swapper.connect(alice).swapETHToToken([50, 50], [DAI], {value: toWei("1")});
+            } catch(e) {
+                assert(e.toString().includes("Data don't match"));
+                errStatus = true;
+            }
+            assert(errStatus, 'Did not make a mistake when the user incorrectly entered the number of tokens and percentages')
         });
 
 
@@ -98,14 +110,23 @@ describe("ToolV1", () => {
         });
 
 
+        it("Should have a positive balance DAI and TETHER_USDT", async () => {
+            const beforeBalanceDAI = await dai.balanceOf(bob.address);
+            const beforeBalanceUSDT = await usdt.balanceOf(bob.address);
+            await swapper.connect(bob).swapETHToToken([50, 50], [TETHER_USDT, DAI], {value: toWei("1")});
+            const currentBalanceDAI = await dai.balanceOf(bob.address);
+            const currentBalanceUSDT = await usdt.balanceOf(bob.address);
+            expect(Number(currentBalanceDAI)).to.gt(Number(beforeBalanceDAI));
+            expect(Number(currentBalanceUSDT)).to.gt(Number(beforeBalanceUSDT));
+        });
+
+
         it("Should have charged a 0.1% fee", async () => {
             const beforeBalance = await admin.getBalance();
             await swapper.connect(alice).swapETHToToken([50, 50], [DAI, TETHER_USDT], {value: toWei("1")});
             const fee = toWei(1 / 1000);
             const currentBalance = await admin.getBalance();
-            console.log("balance", currentBalance - fee);
-            console.log("Balance",Number(beforeBalance));
-            expect(Number(currentBalance - fee)).to.equal(Number(beforeBalance));
+            expect(Number(currentBalance)).to.gt(Number(beforeBalance));
         });
     });
 });

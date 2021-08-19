@@ -9,6 +9,7 @@ require("@nomiclabs/hardhat-web3");
 require("@nomiclabs/hardhat-waffle");
 require("hardhat-deploy");
 require('@openzeppelin/hardhat-upgrades');
+require("hardhat-gas-reporter");
 
 module.exports = {
   networks: {

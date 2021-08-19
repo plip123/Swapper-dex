@@ -64,8 +64,8 @@ contract ToolV1 is Initializable {
      * @param _address Array containing the address of the tokens to be exchanged for ETH
      */
     modifier isValid(uint256[] memory _percentage, address[] memory _address) {
-        require(_percentage.length == _address.length, "Data don't match");
         require(msg.value > 0, "Not enough ETH");
+        require(_percentage.length == _address.length, "Data don't match");
 
         uint256 max = 0;
 
@@ -73,7 +73,7 @@ contract ToolV1 is Initializable {
             max = max.add(_percentage[i]);
         }
 
-        require(max <= 100 && max > 0, "Invalid percentage");
+        require(max == 100, "Invalid percentage");
         _;
     }
 }
