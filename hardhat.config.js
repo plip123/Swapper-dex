@@ -16,7 +16,7 @@ module.exports = {
     hardhat: {
       // Uncomment these lines to use mainnet fork
       forking: {
-        url: `https://eth-mainnet.alchemyapi.io/v2/mWxBg1C8Dta2K7jjOP-xpEG2cc97cPJn`,
+        url: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_KEY}`,
         blockNumber: 11589707,
       },
     },
@@ -32,7 +32,7 @@ module.exports = {
     deployer: 0,
     // admin: {
     //   default: 1,
-    //   mainnet: "0x2cf7252e74036d1da831d11089d326296e64a728",
+    //   mainnet: "",
     // },
   },
   solidity: {
